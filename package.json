@@ -2,7 +2,9 @@
   "name": "mok-server-practice",
   "version": "0.0.0",
   "private": true,
-  "port": 3006,
+  "config": {
+    "port": 3006
+  },
   "scripts": {
     "start": "node ./bin/www"
   },
