@@ -1,5 +1,3 @@
-const fs = require('fs');
-const filePath = './db/db.json';
 const randomData = {
     "users": [],
     "tasks": [],
@@ -13,10 +11,7 @@ function generateRandomData() {
     generateRandomTasks(10);
     generateRandomNotifications(10);
     generateRandomFilesAndContents(15);
-    fs.writeFile(filePath, JSON.stringify(randomData), () => {
-        console.log('random data generated');
-    });
-    formatRandomDataFile();
+    return randomData;
 }
 
 function generateUsers(amount) {
@@ -103,23 +98,4 @@ function generateRandomFilesAndContents(amount) {
     }
 }
 
-function formatRandomDataFile() {
-    fs.readFile(filePath, {}, (err, data) => {
-        let formattedFile = '{\n' + data.toString()
-            .replace(/:\[/g, ':\n[')
-            .replace(/],/g, '],\n')
-            .replace(/},/g, '},\n').slice(1);
-        formattedFile = formattedFile.slice(0, formattedFile.length - 1) + '\n}';
-        fs.writeFile(filePath, formattedFile, () => {
-            console.log('random data file formatted')
-        });
-    });
-}
-
-function removeData() {
-    fs.unlink(filePath, () => {
-        console.log('data removed');
-    });
-}
-
-module.exports = {generateData: generateRandomData, removeData: removeData};
+module.exports = generateRandomData;
