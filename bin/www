@@ -8,16 +8,21 @@ const debug = require('debug')('mok-server-practice:server');
 const http = require('http');
 const packageJSON = require('../package.json');
 const os = require('os');
-
+const networkInterfaces = os.networkInterfaces();
 /**
  * Get port from environment and store in Express.
  */
-
-const hostAddress = os.networkInterfaces()['Loopback Pseudo-Interface 1'][1].address;
-
-const port = normalizePort(packageJSON.port || '3000');
+const port = normalizePort(packageJSON.config.port || '3000');
 app.set('port', port);
-console.log('Server is running on http://' + hostAddress + ':' + port);
+const hostAddress = [];
+Object.keys(networkInterfaces).forEach(ifname => {
+  networkInterfaces[ifname].forEach(iface => {
+    if ('IPv4' !== iface.family || iface.internal !== false) return;
+    hostAddress.push(`http://${iface.address}:${port}`);
+  });
+});
+
+console.log('Server is running on ' + hostAddress[0]);
 /**
  * Create HTTP server.
  */
