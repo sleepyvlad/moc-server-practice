@@ -1,13 +1,22 @@
 const fs = require('fs');
+const filePath = './db/db.json';
 const randomData = {
     "users": [],
+    "tasks": [],
+    "notifications": [],
+    "files": [],
+    "contents": [],
 };
 
 function generateRandomData() {
     generateUsers(100);
-    fs.writeFile('./db/db.json', JSON.stringify(randomData), () => {
+    generateRandomTasks(10);
+    generateRandomNotifications(10);
+    generateRandomFilesAndContents(15);
+    fs.writeFile(filePath, JSON.stringify(randomData), () => {
         console.log('random data generated');
     });
+    formatRandomDataFile();
 }
 
 function generateUsers(amount) {
@@ -17,7 +26,7 @@ function generateUsers(amount) {
             "email" : generateRandomEmail(),
             "password" : generateRandomString(),
             "avatar" : generateRandomString(),
-            "role" : generateRandomRole(),
+            "role" : generateRandomRole().name,
         });
     }
 }
@@ -27,16 +36,90 @@ function generateRandomString() {
 }
 
 function generateRandomEmail() {
-    const domens = ['@mail.ru', '@yandex.ru' , '@htc-cs.ru' , '@gmail.com' , '@rambler.ru' , '@yahoo.ru'];
-    const randomDomen = domens[Math.floor(Math.random()*6)];
+    const domains = ['@mail.ru', '@yandex.ru' , '@htc-cs.ru' , '@gmail.com' , '@rambler.ru' , '@yahoo.ru'];
+    const randomDomain = domains[Math.floor(Math.random()*6)];
 
-    return Math.random().toString(36).substring(2, 8) + randomDomen;
+    return Math.random().toString(36).substring(2, 8) + randomDomain;
 }
 
 function generateRandomRole() {
     const roles = ['admin', 'manager', 'contentMaker'];
-    const randomRole = roles[Math.floor(Math.random()*3)];
-    return randomRole;
+    const randomInt = Math.floor(Math.random()*3);
+    const randomRole = roles[randomInt];
+    return { id: randomInt + 1, name: randomRole };
 }
 
-module.exports = generateRandomData;
+function generateRandomTasks(amount) {
+    for (let i = 0; i < amount; i++) {
+        randomData["tasks"].push({
+            "name": generateRandomString(),
+            "type": generateRandomString(),
+            "description": generateRandomString(),
+            "author" : getRandomUser().id,
+            "executor": getRandomUser().id,
+            "dateExpired": generateRandomDateFromNow(),
+        });
+    }
+}
+
+function generateRandomDateFromNow() {
+    return (new Date(new Date().getTime() + Math.floor(Math.random() * 1000000000))).toString();
+}
+
+function getRandomUser() {
+    const randomUserId = Math.floor(Math.random() * (randomData.users.length));
+    return { "user": randomData.users[randomUserId].name, "id": randomUserId + 1 };
+}
+
+function getRandomTask() {
+    const randomTaskId = Math.floor(Math.random() * (randomData.tasks.length));
+    return { "task": randomData.tasks[randomTaskId].task, "id": randomTaskId + 1};
+}
+
+function generateRandomNotifications(amount) {
+    for (let i = 1; i <= amount; i++) {
+        randomData.notifications.push({
+            "id": i,
+            "type": generateRandomString(),
+            "date": generateRandomDateFromNow(),
+            "message": generateRandomString(),
+            "user": {...getRandomUser()},
+            "task": {...getRandomTask()},
+        });
+    }
+}
+
+function generateRandomFilesAndContents(amount) {
+    const generateRandomFileOrTask = () => {
+        return {
+            "file": generateRandomString(),
+            "task": getRandomTask().id,
+        }
+    };
+
+    for (let i = 0; i < amount; i++) {
+        randomData.files.push(generateRandomFileOrTask());
+        randomData.contents.push(generateRandomFileOrTask());
+    }
+}
+
+function formatRandomDataFile() {
+    fs.readFile(filePath, {}, (err, data) => {
+        let formattedFile = '{\n' + data.toString()
+            .replace(/:\[/g, ':\n[')
+            .replace(/],/g, '],\n')
+            .replace(/},/g, '},\n').slice(1);
+        formattedFile = formattedFile.slice(0, formattedFile.length - 1) + '\n}';
+        fs.writeFile(filePath, formattedFile, () => {
+            console.log('random data file formatted')
+        });
+    });
+}
+
+function removeData() {
+    fs.unlink(filePath, () => {
+        console.log('data removed');
+    });
+}
+
+module.exports = {generateData: generateRandomData, removeData: removeData};
