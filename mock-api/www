@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/mock-api/env node
 
 /**
  * Module dependencies.
