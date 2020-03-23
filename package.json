@@ -3,10 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "config": {
-    "port": 3008
+    "http-port": 3008,
+    "https-port": 3003
   },
   "scripts": {
-    "start": "node mock-api/www"
+    "start": "node www"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",

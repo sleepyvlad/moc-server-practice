@@ -2,7 +2,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
-const indexRouter = require('./mock-api/routes');
+const indexRouter = require('./routes');
 
 const app = express();
 

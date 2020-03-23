@@ -1,0 +1,59 @@
+#!/usr/mock-api/env node
+
+/**
+ * Module dependencies.
+ */
+const app = require('./mock-api/app');
+const debug = require('debug')('mok-server-practice:server');
+const http = require('http');
+const https = require('https');
+const packageJSON = require('./package.json');
+const os = require('os');
+const networkInterfaces = os.networkInterfaces();
+/**
+ * Get port from environment and store in Express.
+ */
+const httpPort = normalizePort(packageJSON.config["http-port"] || '3000');
+const httpsPort = normalizePort( packageJSON.config["https-port"] || '3001');
+
+const hostAddress = [];
+Object.keys(networkInterfaces).forEach(ifname => {
+  networkInterfaces[ifname].forEach(iface => {
+    if ('IPv4' !== iface.family || iface.internal !== false) return;
+    hostAddress.push(`http://${iface.address}:${httpPort}`);
+    hostAddress.push(`https://${iface.address}:${httpsPort}`);
+  });
+});
+
+console.log('Http server is running on ' + hostAddress[0]);
+console.log('Https server is running on ' + hostAddress[1]);
+/**
+ * Create HTTP server.
+ */
+
+const httpServer = http.createServer(app);
+const httpsServer = https.createServer(app);
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+httpServer.listen(httpPort);
+
+httpsServer.listen(httpsPort);
+
+function normalizePort(val) {
+  const port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
