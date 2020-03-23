@@ -4,6 +4,8 @@ const randomData = {
     "notifications": [],
     "files": [],
     "contents": [],
+    "accessToken": '',
+    "refreshToken": '',
 };
 
 function generateRandomData() {
@@ -11,6 +13,7 @@ function generateRandomData() {
     generateRandomTasks(10);
     generateRandomNotifications(10);
     generateRandomFilesAndContents(15);
+    generateRandomToken();
     return randomData;
 }
 
@@ -96,6 +99,11 @@ function generateRandomFilesAndContents(amount) {
         randomData.files.push(generateRandomFileOrTask());
         randomData.contents.push(generateRandomFileOrTask());
     }
+}
+
+function generateRandomToken() {
+    randomData.accessToken = generateRandomString();
+    randomData.refreshToken = generateRandomString();
 }
 
 module.exports = generateRandomData;
