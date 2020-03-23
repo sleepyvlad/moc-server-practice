@@ -1,6 +1,10 @@
-function randomDelay(next) {
+function randomDelay() {
     const randomTimeOut = Math.floor(Math.random() * 6) * 1000;
-    setTimeout(() => next(), randomTimeOut);
+    return new Promise((res, rej) => {
+        setTimeout(() => {
+            res();
+        }, randomTimeOut);
+    });
 }
 
 module.exports = randomDelay;

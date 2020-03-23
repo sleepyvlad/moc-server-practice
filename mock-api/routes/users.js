@@ -1,75 +1,39 @@
 const express = require('express');
 const router = express.Router();
 const routes = require('../constants/routes');
-const utils = require('../utils/utils');
+const dataGenerator = require('../utils/data-generator');
 
-/* GET users or user. */
-router.get(routes.users, function(req, res, next) {
+function checkAuth(req, res) {
   if (req.headers.authorization && req.headers.authorization.indexOf('Bearer') !== -1) {
-    if (req.query.id){
-      const id = Number.parseInt(req.query.id);
-      if (!Number.isNaN(id) && id !== 0 && id <= utils.dataGenerator().users.length) {
-        res.status(200).send(utils.dataGenerator().users[id]);
-      } else {
-        res.status(400).send('Bad Request');
-      }
-    } else {
-      res.status(200).send(utils.dataGenerator().users);
-    }
-  } else {
-    res.status(401).send('Not Authorized');
+    return true;
   }
-});
+  res.status(401).send('Not Authorized');
+  return false;
+}
 
-/* POST user.*/
-router.post(routes.users, function (req, res, next) {
-  const { body, headers } = req;
-  const { name, email, password, avatar, role } = body;
-  if (headers.authorization && req.headers.authorization.indexOf('Bearer') !== -1) {
-    if (name && email && password && avatar && role) {
-      if (name.length && email.length && password.length && avatar.length && role.length) {
-        res.status(201).send();
-      } else {
-        res.status(409).send('Invalid fields');
-      }
-    } else {
-      res.status(400).send('Bad request');
+const methods = [
+  { method: 'get', status: 200, send: (req) => {
+    if (req && req.query) {
+      return dataGenerator().users[Number.parseInt(req.query.id)];
     }
-  } else {
-    res.status(409).send('Not Authorized');
-  }
-});
+    return dataGenerator().users;
+  }},
+  { method: 'post', status: 201, send: ''},
+  { method: 'put', status: 204, send: '' },
+  { method: 'delete', status: 204, send: '' },
+  //Error methods
+  // { method: 'get', status: 400, send: 'Bad Request'},
+  // { method: 'post', status: 409, send: 'Invalid Fields'},
+  // { method: 'post', status: 400, send: 'Bad Request'},
+  // { method: 'put', status: 404, send: 'Not Found' },
+  // { method: 'put', status: 400, send: 'Bad Request'},
+  // { method: 'delete', status: 404, send: 'Not Found'},
+];
 
-/* PUT user.*/
-router.put(routes.users, function (req, res, next) {
-  const { query: { id }, body, headers } = req;
-  if (headers.authorization && headers.authorization.indexOf('Bearer') !== -1) {
-    if (id && id <= utils.dataGenerator().users.length) {
-      if (body && Object.keys(body).length
-          && Object.keys(body).every(el => utils.dataGenerator().users[id].hasOwnProperty(el))) {
-        res.status(204).send();
-      } else {
-        res.status(400).send('Bad Request');
-      }
-    } else {
-      res.status(404).send('Not Found');
-    }
-  } else {
-    res.status(401).send('Not Authorized');
+methods.forEach(method => router[method.method](routes.users, function (req, res, next) {
+  if (checkAuth(req, res)) {
+    res.status(method.status).send(typeof method.send === 'function' ? method.send(req) : method.send);
   }
-});
+}));
 
-/* DELETE user.*/
-router.delete(routes.users, function (req, res, next) {
-  const { query: { id }, headers } = req;
-  if (headers.authorization && headers.authorization.indexOf('Bearer') !== -1) {
-    if (id && id <= utils.dataGenerator().users.length && utils.dataGenerator().users[id]) {
-      res.status(204).send();
-    } else {
-      res.status(404).send('Not Found');
-    }
-  } else {
-    res.status(401).send('Not Authorized');
-  }
-});
 module.exports = router;
