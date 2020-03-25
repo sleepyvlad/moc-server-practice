@@ -8,7 +8,11 @@ const methods = [
     }
     return dataGenerator().users;
   }},
-  { method: 'post', status: 201, route: routes.users, send: ''},
+  { method: 'post', status: 201, route: routes.users, send: (req, dynamicData) => {
+      dynamicData.users = dataGenerator().users;
+      dynamicData.users.push(req.body);
+      return '';
+    }},
   { method: 'put', status: 204, route: routes.users, send: '' },
   { method: 'delete', status: 204, route: routes.users, send: '' },
   //Error methods
