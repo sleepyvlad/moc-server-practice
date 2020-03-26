@@ -1,8 +1,9 @@
 const express = require('express');
+const router = express.Router();
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
-const indexRouter = require('./mock-api/routes');
+const indexRouter = require('./routes');
 
 const app = express();
 
@@ -12,6 +13,6 @@ app.use(bodyParser.raw());
 app.use(logger('dev'));
 app.use(cookieParser());
 
-app.use('/', indexRouter);
+app.use('/', indexRouter(router));
 
 module.exports = app;

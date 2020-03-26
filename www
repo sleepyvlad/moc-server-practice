@@ -1,0 +1,44 @@
+#!/usr/mock-api/env node
+
+/**
+ * Module dependencies.
+ */
+const app = require('./mock-api/app');
+const http = require('http');
+const https = require('https');
+const packageJSON = require('./package.json');
+const os = require('os');
+const fs = require('fs');
+const networkInterfaces = os.networkInterfaces();
+const privateKey = fs.readFileSync('./mock-api/privateKey.key');
+const certificate = fs.readFileSync('./mock-api/certificate.crt');
+/**
+ * Get port from environment and store in Express.
+ */
+const httpsPort = packageJSON.config["https-port"] || 3001;
+
+const hostAddress = [];
+Object.keys(networkInterfaces).forEach(ifname => {
+    networkInterfaces[ifname].forEach(iface => {
+        if ('IPv4' !== iface.family || iface.internal !== false) return;
+        hostAddress.push(`https://${iface.address}:${httpsPort}`);
+    });
+});
+
+console.log('Https server is running on ' + hostAddress[0]);
+/**
+ * Create HTTP server.
+ */
+
+const httpsServer = https.createServer({
+    key: privateKey,
+    cert: certificate,
+}, app);
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+httpsServer.listen(httpsPort);
+
+module.exports.hostAddress = hostAddress[0];

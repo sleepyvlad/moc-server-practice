@@ -12,7 +12,7 @@ const methods = [
             refreshToken: dataGenerator().refreshToken,
         }, },
     //Error methods
-    { method: 'post', status: 400, route: routes.login , send: 'Bad Request'},
+    // { method: 'post', status: 400, route: routes.login , send: 'Bad Request'},
 ];
 
 module.exports = methods;
