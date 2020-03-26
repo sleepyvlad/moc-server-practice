@@ -10,30 +10,26 @@ const packageJSON = require('./package.json');
 const os = require('os');
 const fs = require('fs');
 const networkInterfaces = os.networkInterfaces();
-const privateKey = fs.readFileSync('privateKey.key');
-const certificate = fs.readFileSync('certificate.crt');
+const privateKey = fs.readFileSync('./mock-api/privateKey.key');
+const certificate = fs.readFileSync('./mock-api/certificate.crt');
 /**
  * Get port from environment and store in Express.
  */
-const httpPort = normalizePort(packageJSON.config["http-port"] || '3000');
-const httpsPort = normalizePort(packageJSON.config["https-port"] || '3001');
+const httpsPort = packageJSON.config["https-port"] || 3001;
 
 const hostAddress = [];
 Object.keys(networkInterfaces).forEach(ifname => {
     networkInterfaces[ifname].forEach(iface => {
         if ('IPv4' !== iface.family || iface.internal !== false) return;
-        hostAddress.push(`http://${iface.address}:${httpPort}`);
         hostAddress.push(`https://${iface.address}:${httpsPort}`);
     });
 });
 
-console.log('Http server is running on ' + hostAddress[0]);
-console.log('Https server is running on ' + hostAddress[1]);
+console.log('Https server is running on ' + hostAddress[0]);
 /**
  * Create HTTP server.
  */
 
-const httpServer = http.createServer(app);
 const httpsServer = https.createServer({
     key: privateKey,
     cert: certificate,
@@ -43,24 +39,6 @@ const httpsServer = https.createServer({
  * Listen on provided port, on all network interfaces.
  */
 
-httpServer.listen(httpPort);
-
 httpsServer.listen(httpsPort);
 
-function normalizePort(val) {
-    const port = parseInt(val, 10);
-
-    if (isNaN(port)) {
-        // named pipe
-        return val;
-    }
-
-    if (port >= 0) {
-        // port number
-        return port;
-    }
-
-    return false;
-}
-
-module.exports.hostAdresses = hostAddress;
+module.exports.hostAddress = hostAddress[0];
